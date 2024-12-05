@@ -1,0 +1,169 @@
+<!DOCTYPE html>  
+<html lang="zh">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>五子棋游戏</title>  
+    <style>  
+        body {  
+            display: flex;  
+            flex-direction: column;  
+            justify-content: center;  
+            align-items: center;  
+            height: 100vh;  
+            background-color: #f0f0f0;  
+            font-family: Arial, sans-serif;  
+            margin: 0;  
+        }  
+
+        h1 {  
+            margin-bottom: 20px;  
+            color: #333;  
+        }  
+
+        #board {  
+            display: grid;  
+            grid-template-columns: repeat(15, 40px);  
+            grid-template-rows: repeat(15, 40px);  
+            border: 2px solid #000;  
+            border-radius: 8px;  
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);  
+        }  
+
+        .cell {  
+            width: 40px;  
+            height: 40px;  
+            border: 1px solid #ccc;  
+            display: flex;  
+            align-items: center;  
+            justify-content: center;  
+            font-size: 24px;  
+            cursor: pointer;  
+            transition: background-color 0.2s;  
+        }  
+
+        .cell:hover {  
+            background-color: #e0e0e0;  
+        }  
+
+        .cell.X {  
+            color: red;  
+        }  
+
+        .cell.O {  
+            color: blue;  
+        }  
+
+        .reset-button {  
+            margin-top: 20px;  
+            padding: 10px 20px;  
+            font-size: 16px;  
+            color: white;  
+            background-color: #28a745;  
+            border: none;  
+            border-radius: 5px;  
+            cursor: pointer;  
+            transition: background-color 0.2s;  
+        }  
+
+        .reset-button:hover {  
+            background-color: #218838;  
+        }  
+    </style>  
+</head>  
+<body>  
+    <h1>五子棋游戏</h1>  
+    <div id="board"></div>  
+    <button id="reset" class="reset-button">重置游戏</button>  
+
+    <script>  
+        const board = document.getElementById("board");  
+        const resetButton = document.getElementById("reset");  
+        const size = 15;  
+        let currentPlayer = 'X';  
+        let boardState = Array(size).fill(null).map(() => Array(size).fill(null));  
+
+        // 创建棋盘  
+        function createBoard() {  
+            for (let i = 0; i < size; i++) {  
+                for (let j = 0; j < size; j++) {  
+                    const cell = document.createElement("div");  
+                    cell.className = "cell";  
+                    cell.dataset.row = i;  
+                    cell.dataset.col = j;  
+                    cell.addEventListener("click", handleCellClick);  
+                    board.appendChild(cell);  
+                }  
+            }  
+        }  
+
+        // 处理棋子点击  
+        function handleCellClick(e) {  
+            const row = e.target.dataset.row;  
+            const col = e.target.dataset.col;  
+
+            if (boardState[row][col] !== null) {  
+                return; // 该位置已有棋子  
+            }  
+
+            boardState[row][col] = currentPlayer;  
+            e.target.textContent = currentPlayer;  
+            e.target.classList.add(currentPlayer); // 添加对应的类以改变颜色  
+
+            if (checkWin(row, col)) {  
+                alert(`${currentPlayer} 胜利！`);  
+                resetGame();  
+            } else {  
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X'; // 切换玩家  
+            }  
+        }  
+
+        // 检查胜利条件  
+        function checkWin(row, col) {  
+            return (  
+                checkDirection(row, col, 1, 0) || // 水平  
+                checkDirection(row, col, 0, 1) || // 垂直  
+                checkDirection(row, col, 1, 1) || // 主对角线  
+                checkDirection(row, col, 1, -1)   // 副对角线  
+            );  
+        }  
+
+        function checkDirection(row, col, dRow, dCol) {  
+            let count = 1;  
+
+            count += countDirection(row, col, dRow, dCol);   // 正向  
+            count += countDirection(row, col, -dRow, -dCol); // 反向  
+
+            return count >= 5; // 连续5个棋子  
+        }  
+
+        function countDirection(row, col, dRow, dCol) {  
+            let count = 0;  
+            let r = parseInt(row) + dRow;  
+            let c = parseInt(col) + dCol;  
+
+            while (r >= 0 && r < size && c >= 0 && c < size && boardState[r][c] === currentPlayer) {  
+                count++;  
+                r += dRow;  
+                c += dCol;  
+            }  
+            return count;  
+        }  
+
+        // 重置游戏  
+        function resetGame() {  
+            boardState = Array(size).fill(null).map(() => Array(size).fill(null));  
+            currentPlayer = 'X';  
+            document.querySelectorAll('.cell').forEach(cell => {  
+                cell.textContent = '';  
+                cell.classList.remove('X', 'O'); // 移除玩家的类  
+            });  
+        }  
+
+        // 重置按钮事件  
+        resetButton.addEventListener("click", resetGame);  
+
+        createBoard();  
+    </script>  
+</body>  
+</html>
